@@ -8,30 +8,19 @@ import {
   TrendingUp, 
   Plus,
   ArrowUpRight,
-  Calendar,
   Square,
   Pause
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 import { motion, useInView } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 
 
 
 const Dashboard = () => {
   const progressRef = useRef(null);
   const isInView = useInView(progressRef, { once: true });
-  const [animatedValue, setAnimatedValue] = useState(0);
 
-  // Animate the percentage value
-  useEffect(() => {
-    if (isInView) {
-      const timer = setTimeout(() => {
-        setAnimatedValue(41);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isInView]);
 
   // Sample data for project analytics with monthly data
   const projectData = [
@@ -49,36 +38,33 @@ const Dashboard = () => {
     { month: 'Dec', value: 30, isActive: false },    // Inactive month
   ];
 
-  const progressData = [
-    { name: 'Completed', value: 41, fill: '#16a34a' },
-    { name: 'Remaining', value: 59, fill: 'url(#progressHatch)' },
-  ];
+
 
   const teamMembers = [
     { 
-      name: 'Alexandra Deff', 
-      task: 'Working on GitHub Project Repository',
+      name: 'Sarah Johnson', 
+      task: 'Stock Audit - Dairy Section',
       status: 'Completed',
       avatar: '👩‍💼',
       statusColor: 'bg-green-100 text-green-800'
     },
     { 
-      name: 'Edwin Adenika', 
-      task: 'Working on Integrate User Authentication System',
+      name: 'Michael Chen', 
+      task: 'Receiving Fresh Produce Delivery',
       status: 'In Progress', 
       avatar: '👨‍💻',
       statusColor: 'bg-blue-100 text-blue-800'
     },
     { 
-      name: 'Isaac Oluwatemilorun', 
-      task: 'Working on Develop Web Filter Functionality',
+      name: 'Emma Rodriguez', 
+      task: 'Expiry Date Monitoring - Bakery',
       status: 'Pending',
-      avatar: '👨‍🔬',
+      avatar: '👩‍🔬',
       statusColor: 'bg-gray-100 text-gray-800'
     },
     { 
-      name: 'David Oshodi', 
-      task: 'Working on Responsive Layout for Homepage',
+      name: 'James Wilson', 
+      task: 'Restocking Frozen Foods Aisle',
       status: 'In Progress',
       avatar: '👨‍🎨',
       statusColor: 'bg-blue-100 text-blue-800'
@@ -86,11 +72,11 @@ const Dashboard = () => {
   ];
 
   const projectTasks = [
-    { title: 'Develop API Endpoints', dueDate: 'Due date: Nov 26, 2024', icon: '🔵' },
-    { title: 'Onboarding Flow', dueDate: 'Due date: Nov 19, 2024', icon: '🟢' },
-    { title: 'Build Dashboard', dueDate: 'Due date: Nov 28, 2024', icon: '🟡' },
-    { title: 'Optimize Page Load', dueDate: 'Due date: Nov 30, 2024', icon: '🟠' },
-    { title: 'Cross-Browser Testing', dueDate: 'Due date: Dec 5, 2024', icon: '🔴' },
+    { title: 'Restock Milk & Dairy', dueDate: 'Due: Nov 26, 2024', icon: '🥛' },
+    { title: 'Quality Check Produce', dueDate: 'Due: Nov 19, 2024', icon: '🥬' },
+    { title: 'Update Price Labels', dueDate: 'Due: Nov 28, 2024', icon: '🏷️' },
+    { title: 'Inventory Count - Aisle 3', dueDate: 'Due: Nov 30, 2024', icon: '📊' },
+    { title: 'Remove Expired Items', dueDate: 'Due: Dec 5, 2024', icon: '⚠️' },
   ];
 
   return (
@@ -100,33 +86,33 @@ const Dashboard = () => {
           {/* Page Header */}
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-              <p className="text-sm text-gray-500 mt-0.5">Plan, prioritize, and accomplish your tasks with ease.</p>
+              <h1 className="text-2xl font-semibold text-gray-900">Inventory Management Dashboard</h1>
+              <p className="text-sm text-gray-500 mt-0.5">AI-powered inventory optimization for supermarket operations</p>
             </div>
             {/* Header Actions */}
             <div className="flex gap-3">
               <Button className="bg-green-600 hover:bg-green-700 text-white">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Project
+                Add Product
               </Button>
               <Button variant="outline" className="text-gray-600 border-gray-300">
-                Import Data
+                Import Stock
               </Button>
             </div>
           </div>
 
-          {/* Top Stats Cards - 4 project cards */}
+          {/* Top Stats Cards - 4 inventory cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Total Projects */}
+            {/* Total Products */}
             <Card className="bg-gradient-to-br from-green-600 to-green-700 text-white border-0">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-green-100 text-sm">Total Projects</p>
-                    <p className="text-4xl font-bold mt-2">24</p>
+                    <p className="text-green-100 text-sm">Total Products</p>
+                    <p className="text-4xl font-bold mt-2">8,542</p>
                     <div className="flex items-center mt-2 text-green-100 text-xs">
                       <TrendingUp className="h-3 w-3 mr-1" />
-                      <span>Increased from last month</span>
+                      <span>+12% from last month</span>
                     </div>
                   </div>
                   <div className="p-3 bg-white/20 rounded-full">
@@ -136,53 +122,16 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Ended Projects */}
+            {/* Low Stock Alerts */}
             <Card className="bg-white shadow-sm border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-600 text-sm">Ended Projects</p>
-                    <p className="text-4xl font-bold text-gray-900 mt-2">10</p>
+                    <p className="text-gray-600 text-sm">Low Stock Alerts</p>
+                    <p className="text-4xl font-bold text-orange-600 mt-2">127</p>
                     <div className="flex items-center mt-2 text-gray-500 text-xs">
                       <TrendingUp className="h-3 w-3 mr-1" />
-                      <span>Increased from last month</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-gray-100 rounded-full">
-                    <ArrowUpRight className="h-6 w-6 text-gray-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Running Projects */}
-            <Card className="bg-white shadow-sm border border-gray-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-sm">Running Projects</p>
-                    <p className="text-4xl font-bold text-gray-900 mt-2">12</p>
-                    <div className="flex items-center mt-2 text-gray-500 text-xs">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      <span>Decreased from last month</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <ArrowUpRight className="h-6 w-6 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pending Projects */}
-            <Card className="bg-white shadow-sm border border-gray-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-sm">Pending Project</p>
-                    <p className="text-4xl font-bold text-gray-900 mt-2">2</p>
-                    <div className="flex items-center mt-2 text-gray-500 text-xs">
-                      <span>On Previous</span>
+                      <span>Requires attention</span>
                     </div>
                   </div>
                   <div className="p-3 bg-orange-100 rounded-full">
@@ -191,14 +140,51 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Out of Stock */}
+            <Card className="bg-white shadow-sm border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Out of Stock</p>
+                    <p className="text-4xl font-bold text-red-600 mt-2">23</p>
+                    <div className="flex items-center mt-2 text-gray-500 text-xs">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      <span>Critical items</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-red-100 rounded-full">
+                    <ArrowUpRight className="h-6 w-6 text-red-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Expiring Soon */}
+            <Card className="bg-white shadow-sm border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Expiring Soon</p>
+                    <p className="text-4xl font-bold text-yellow-600 mt-2">89</p>
+                    <div className="flex items-center mt-2 text-gray-500 text-xs">
+                      <span>Next 7 days</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-yellow-100 rounded-full">
+                    <ArrowUpRight className="h-6 w-6 text-yellow-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Project Analytics */}
+            {/* Sales Analytics */}
             <Card className="lg:col-span-5 bg-white shadow-sm border border-gray-200">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">Project Analytics</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">Sales Analytics</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
@@ -226,176 +212,217 @@ const Dashboard = () => {
                       maxBarSize={28}
                       radius={[6, 6, 6, 6]}
                     >
-                      {projectData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={entry.isActive ? "#16a34a" : "url(#diagonalHatch)"}
-                          stroke={entry.isActive ? "none" : "#d1d5db"}
-                          strokeWidth={entry.isActive ? 0 : 1}
-                        />
-                      ))}
+                      {projectData.map((entry, index) => {
+                        // Color coding based on value: Red (low), Orange (medium), Green (high)
+                        let barColor;
+                        if (entry.value < 50) {
+                          barColor = "#dc2626"; // Red for low values
+                        } else if (entry.value < 80) {
+                          barColor = "#ea580c"; // Orange for medium values
+                        } else {
+                          barColor = "#16a34a"; // Green for high values
+                        }
+                        
+                        return (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={barColor}
+                            stroke="none"
+                            strokeWidth={0}
+                          />
+                        );
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            {/* Reminders */}
+            {/* AI Insights */}
             <Card className="lg:col-span-3 bg-white shadow-sm border border-gray-200">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">Reminders</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">AI Insights</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-gray-900">Meeting with Arc Company</h4>
-                  <p className="text-sm text-gray-500 mt-1">Time: 2:00 pm - 4:00 pm</p>
+                  <h4 className="font-semibold text-gray-900">Restock Recommendation</h4>
+                  <p className="text-sm text-gray-500 mt-1">Order 240 units of Milk by tomorrow</p>
                   <Button className="mt-3 bg-green-600 hover:bg-green-700 text-white w-full">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Start Meeting
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Order
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Project Progress */}
+            {/* Stock Level Indicator - Speedometer */}
             <motion.div
               ref={progressRef}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
+              className="lg:col-span-4"
             >
-              <Card className="lg:col-span-4 bg-white shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+              <Card className="bg-white shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 h-full group">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold text-gray-900">Project Progress</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900">Stock Level Monitor</CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center">
+                <CardContent className="flex flex-col items-center justify-center py-4 px-6 h-full min-h-[300px]">
                   <motion.div 
-                    className="relative w-48 h-24 mb-6"
+                    className="relative w-full max-w-sm h-40 mb-6 flex items-center justify-center"
                     initial={{ scale: 0 }}
                     animate={isInView ? { scale: 1 } : { scale: 0 }}
                     transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
                   >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <defs>
-                          <pattern id="progressHatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-                            <rect width="4" height="8" fill="#e5e7eb" />
-                            <rect x="4" width="4" height="8" fill="transparent" />
-                          </pattern>
-                        </defs>
-                        <Pie
-                          data={progressData}
-                          cx="50%"
-                          cy="100%"
-                          innerRadius={60}
-                          outerRadius={90}
-                          paddingAngle={2}
-                          dataKey="value"
-                          startAngle={180}
-                          endAngle={0}
-                          stroke="none"
-                          cornerRadius={8}
-                          animationBegin={isInView ? 300 : 0}
-                          animationDuration={1200}
-                          animationEasing="ease-out"
-                        >
-                          {progressData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={entry.fill}
-                              stroke={entry.name === 'Remaining' ? '#d1d5db' : 'none'}
-                              strokeWidth={entry.name === 'Remaining' ? 1 : 0}
-                            />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-end justify-center pb-2">
-                      <motion.span 
-                        className="text-3xl font-bold text-gray-900"
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
-                        transition={{ duration: 0.5, delay: 1.2 }}
-                      >
-                        <motion.span
-                          initial={{ textShadow: "0 0 0 transparent" }}
-                          animate={isInView ? { 
-                            textShadow: "0 0 8px rgba(34, 197, 94, 0.3)"
-                          } : {}}
-                          transition={{ duration: 0.3, delay: 1.5 }}
-                        >
-                          {animatedValue}%
-                        </motion.span>
-                      </motion.span>
-                    </div>
+                    <svg width="100%" height="100%" viewBox="0 0 280 180" className="overflow-visible">
+                      <defs>
+                        {/* Enhanced green gradient for the progress arc */}
+                        <linearGradient id="speedometerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#059669" />
+                          <stop offset="30%" stopColor="#10b981" />
+                          <stop offset="70%" stopColor="#16a34a" />
+                          <stop offset="100%" stopColor="#22c55e" />
+                        </linearGradient>
+                        
+                        {/* Background gradient */}
+                        <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#f3f4f6" />
+                          <stop offset="100%" stopColor="#e5e7eb" />
+                        </linearGradient>
+                        
+                        {/* Enhanced glow effect */}
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                          <feMerge> 
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                        
+                        {/* Shadow filter */}
+                        <filter id="dropshadow" x="-50%" y="-50%" width="200%" height="200%">
+                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000000" floodOpacity="0.1"/>
+                        </filter>
+                      </defs>
+                      
+                      {/* Background arc - perfectly aligned semicircle */}
+                      <path
+                        d="M 40 110 A 100 100 0 0 1 240 110"
+                        fill="none"
+                        stroke="url(#backgroundGradient)"
+                        strokeWidth="16"
+                        strokeLinecap="round"
+                        filter="url(#dropshadow)"
+                      />
+                      
+                      {/* Progress arc with color-coded levels - aligned */}
+                      <motion.path
+                        d="M 40 110 A 100 100 0 0 1 240 110"
+                        fill="none"
+                        stroke={(() => {
+                          const progressPercent = (41/200) * 100; // Updated to 200 scale
+                          if (progressPercent < 25) return "#dc2626"; // Red for low stock
+                          if (progressPercent < 60) return "#eab308"; // Yellow for medium stock
+                          return "#16a34a"; // Green for high stock
+                        })()}
+                        strokeWidth="16"
+                        strokeLinecap="round"
+                        strokeDasharray="314"
+                        initial={{ strokeDashoffset: 314 }}
+                        animate={isInView ? { 
+                          strokeDashoffset: 314 - (41/200) * 314 // Updated to 200 scale
+                        } : { strokeDashoffset: 314 }}
+                        transition={{ duration: 2.5, delay: 0.5, ease: "easeOut" }}
+                        filter="url(#glow)"
+                      />
+                      
+
+                      
+                      {/* Clean center circle */}
+                      <motion.circle
+                        cx="140"
+                        cy="110"
+                        r="10"
+                        fill="#ffffff"
+                        stroke="#e5e7eb"
+                        strokeWidth="3"
+                        filter="url(#dropshadow)"
+                        initial={{ scale: 0 }}
+                        animate={isInView ? { scale: 1 } : { scale: 0 }}
+                        transition={{ delay: 1.8, duration: 0.4 }}
+                      />
+                    </svg>
+                    
+
                   </motion.div>
                   
-                  <motion.p 
-                    className="text-sm text-gray-600 mb-4"
-                    initial={{ opacity: 0 }}
-                    animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-                    transition={{ duration: 0.5, delay: 1.4 }}
-                  >
-                    Project Ended
-                  </motion.p>
-                  
+                  {/* Color-coded legend */}
                   <motion.div 
-                    className="flex items-center space-x-6 text-sm"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                    transition={{ duration: 0.5, delay: 1.6 }}
+                    className="flex items-center justify-center space-x-8 text-xs w-full mt-4"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+                    transition={{ duration: 0.6, delay: 2.8 }}
                   >
                     <motion.div 
-                      className="flex items-center"
+                      className="flex items-center group"
                       whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
+                      transition={{ type: "spring", stiffness: 400 }}
                     >
                       <motion.div 
-                        className="w-3 h-3 bg-green-600 rounded-full mr-2"
+                        className="w-3 h-3 bg-red-600 rounded-full mr-2 shadow-md"
                         initial={{ scale: 0 }}
                         animate={isInView ? { scale: 1 } : { scale: 0 }}
-                        transition={{ duration: 0.3, delay: 1.7 }}
+                        transition={{ duration: 0.4, delay: 2.9 }}
+                        whileHover={{ scale: 1.3 }}
                       />
-                      <span className="text-gray-600">Completed</span>
+                      <span className="text-gray-700 font-semibold">
+                        Low Stock (&lt;25%)
+                      </span>
                     </motion.div>
                     <motion.div 
-                      className="flex items-center"
+                      className="flex items-center group"
                       whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
+                      transition={{ type: "spring", stiffness: 400 }}
                     >
                       <motion.div 
-                        className="w-3 h-3 bg-gray-300 rounded-full mr-2"
+                        className="w-3 h-3 bg-yellow-500 rounded-full mr-2 shadow-md"
                         initial={{ scale: 0 }}
                         animate={isInView ? { scale: 1 } : { scale: 0 }}
-                        transition={{ duration: 0.3, delay: 1.8 }}
+                        transition={{ duration: 0.4, delay: 3 }}
+                        whileHover={{ scale: 1.3 }}
                       />
-                      <span className="text-gray-600">In Progress</span>
+                      <span className="text-gray-700 font-semibold">
+                        Medium (25-60%)
+                      </span>
                     </motion.div>
                     <motion.div 
-                      className="flex items-center"
+                      className="flex items-center group"
                       whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
+                      transition={{ type: "spring", stiffness: 400 }}
                     >
                       <motion.div 
-                        className="w-3 h-3 bg-gray-200 rounded-full mr-2"
+                        className="w-3 h-3 bg-green-600 rounded-full mr-2 shadow-md"
                         initial={{ scale: 0 }}
                         animate={isInView ? { scale: 1 } : { scale: 0 }}
-                        transition={{ duration: 0.3, delay: 1.9 }}
+                        transition={{ duration: 0.4, delay: 3.1 }}
+                        whileHover={{ scale: 1.3 }}
                       />
-                      <span className="text-gray-600">Pending</span>
+                      <span className="text-gray-700 font-semibold">
+                        High Stock (&gt;60%)
+                      </span>
                     </motion.div>
                   </motion.div>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Team Collaboration */}
+            {/* Inventory Team */}
             <Card className="lg:col-span-6 bg-white shadow-sm border border-gray-200">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">Team Collaboration</CardTitle>
-                                    <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-50">
+                <CardTitle className="text-lg font-semibold text-gray-900">Inventory Team</CardTitle>
+                <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-50">
                   <Plus className="h-4 w-4 mr-1" />
-                  Add Member
+                  Add Staff
                 </Button>
               </CardHeader>
               <CardContent>
@@ -421,11 +448,11 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Project Tasks */}
+            {/* Critical Tasks */}
             <Card className="lg:col-span-3 bg-white shadow-sm border border-gray-200">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">Project</CardTitle>
-                                    <Button size="sm" variant="ghost" className="text-green-600">
+                <CardTitle className="text-lg font-semibold text-gray-900">Critical Tasks</CardTitle>
+                <Button size="sm" variant="ghost" className="text-green-600">
                   <Plus className="h-4 w-4 mr-1" />
                   New
                 </Button>
@@ -443,10 +470,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Time Tracker */}
+            {/* Shift Timer */}
             <Card className="lg:col-span-3 bg-gradient-to-br from-green-600 to-green-700 text-white border-0">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-white">Time Tracker</CardTitle>
+                <CardTitle className="text-lg font-semibold text-white">Shift Timer</CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-6">
                 <div className="text-4xl font-mono font-bold">01:24:08</div>
