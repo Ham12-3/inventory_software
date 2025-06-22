@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, func
 from models.purchase_order import (
     PurchaseOrder, PurchaseOrderItem, SupplierProduct, 
@@ -45,7 +45,10 @@ class PurchaseOrderService:
     # Purchase Order Methods
     def get_purchase_orders(self, status=None, supplier_id=None, page=1, per_page=20):
         """Get purchase orders with filtering"""
-        query = self.db.query(PurchaseOrder)
+        query = self.db.query(PurchaseOrder).options(
+            joinedload(PurchaseOrder.order_items),
+            joinedload(PurchaseOrder.supplier)
+        )
         
         if status:
             query = query.filter(PurchaseOrder.status == status)
@@ -120,7 +123,10 @@ class PurchaseOrderService:
 
     def get_purchase_order_by_id(self, order_id: str):
         """Get purchase order by ID with all related data"""
-        return self.db.query(PurchaseOrder).filter(PurchaseOrder.id == order_id).first()
+        return self.db.query(PurchaseOrder).options(
+            joinedload(PurchaseOrder.order_items),
+            joinedload(PurchaseOrder.supplier)
+        ).filter(PurchaseOrder.id == order_id).first()
 
     def update_purchase_order(self, order_id: str, update_data: PurchaseOrderUpdate):
         """Update purchase order"""

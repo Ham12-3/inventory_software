@@ -186,6 +186,8 @@ const apiRequest = async <T>(
   const url = `${API_BASE_URL}${endpoint}`;
   const token = getAuthToken();
 
+  console.log('🔍 API Request:', { url, method: options.method || 'GET' });
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
@@ -237,6 +239,18 @@ const apiRequest = async <T>(
     return await response.json();
   } catch (error) {
     console.error(`API request failed: ${endpoint}`, error);
+    
+    // Enhanced error handling for network issues
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('Network Error Details:', {
+        url,
+        endpoint,
+        API_BASE_URL,
+        message: 'Backend server might not be running or CORS issue'
+      });
+      throw new Error(`Network Error: Cannot connect to backend server at ${API_BASE_URL}. Please ensure the backend server is running and accessible.`);
+    }
+    
     throw error;
   }
 };
@@ -276,7 +290,22 @@ export class PurchaseOrderService {
       }
     });
 
-    return apiRequest<PurchaseOrder[]>(`/api/purchase-orders?${params.toString()}`);
+    const result = await apiRequest<PurchaseOrder[]>(`/api/purchase-orders?${params.toString()}`);
+    console.log('🔍 Purchase Orders Response:', result);
+    
+    // Debug: Log the first order to see its structure
+    if (result && result.length > 0) {
+      console.log('🔍 First Order Structure:', {
+        id: result[0].id,
+        order_number: result[0].order_number,
+        has_items: !!result[0].items,
+        items_length: result[0].items?.length,
+        has_supplier: !!result[0].supplier,
+        supplier_name: result[0].supplier?.name
+      });
+    }
+    
+    return result;
   }
 
   static async createPurchaseOrder(orderData: CreatePurchaseOrderData, createdBy: string): Promise<PurchaseOrder> {

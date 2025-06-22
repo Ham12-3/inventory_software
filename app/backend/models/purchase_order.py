@@ -83,6 +83,7 @@ class PurchaseOrder(Base):
     # Relationships
     order_items = relationship("PurchaseOrderItem", back_populates="purchase_order", cascade="all, delete-orphan")
     delivery_tracking = relationship("DeliveryTracking", back_populates="purchase_order", uselist=False)
+    supplier = relationship("Supplier", foreign_keys=[supplier_id])
     
     def __repr__(self):
         return f"<PurchaseOrder(id={self.id}, order_number={self.order_number}, status={self.status})>"

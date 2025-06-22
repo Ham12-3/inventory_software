@@ -137,10 +137,42 @@ class PurchaseOrderResponse(PurchaseOrderBase):
     
     # Related data
     supplier: SupplierResponse
-    items: List[PurchaseOrderItemResponse]
+    items: List[PurchaseOrderItemResponse] = Field(alias="order_items")
     
     class Config:
         from_attributes = True
+        populate_by_name = True
+        
+    @classmethod
+    def from_orm(cls, obj):
+        # Manually handle the relationship mapping
+        data = {
+            'id': obj.id,
+            'order_number': obj.order_number,
+            'supplier_id': obj.supplier_id,
+            'status': obj.status,
+            'order_date': obj.order_date,
+            'expected_delivery_date': obj.expected_delivery_date,
+            'actual_delivery_date': obj.actual_delivery_date,
+            'subtotal': obj.subtotal,
+            'tax_amount': obj.tax_amount,
+            'shipping_cost': obj.shipping_cost,
+            'discount_amount': obj.discount_amount,
+            'total_amount': obj.total_amount,
+            'delivery_address': obj.delivery_address,
+            'delivery_instructions': obj.delivery_instructions,
+            'tracking_number': obj.tracking_number,
+            'reference_number': obj.reference_number,
+            'notes': obj.notes,
+            'created_by': obj.created_by,
+            'approved_by': obj.approved_by,
+            'approved_at': obj.approved_at,
+            'created_at': obj.created_at,
+            'updated_at': obj.updated_at,
+            'supplier': obj.supplier,
+            'items': obj.order_items or []  # Explicitly map order_items to items
+        }
+        return cls(**data)
 
 # Delivery Tracking Schemas
 class DeliveryTrackingBase(BaseModel):

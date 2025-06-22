@@ -356,7 +356,7 @@ const PurchaseOrdersPage = () => {
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {order.items.length} items
+                            {order.items?.length || 0} items
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatPrice(order.total_amount)}
@@ -460,14 +460,20 @@ const PurchaseOrdersPage = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {selectedOrder.items.map((item, index) => (
+                    {selectedOrder.items?.map((item, index) => (
                       <tr key={index}>
                         <td className="px-4 py-2 text-sm">{item.product_name}</td>
                         <td className="px-4 py-2 text-sm">{item.quantity_ordered}</td>
                         <td className="px-4 py-2 text-sm">{formatPrice(item.unit_price)}</td>
                         <td className="px-4 py-2 text-sm">{formatPrice(item.total_price || 0)}</td>
                       </tr>
-                    ))}
+                    )) || (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-2 text-sm text-gray-500 text-center">
+                          No items found
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
