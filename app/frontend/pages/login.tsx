@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { supabase } from '../utils/supabaseClient'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 
@@ -16,31 +15,34 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
       })
 
-      if (error) {
-        setError(error.message)
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.detail || 'Login failed')
         setLoading(false)
         return
       }
 
-      if (data.session?.access_token) {
-        // Set the access token as a cookie for server-side authentication
-        document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax`
-        
-        // Set refresh token as well
-        if (data.session.refresh_token) {
-          document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=3600; SameSite=Lax`
-        }
+      // Store the access token in localStorage and cookie
+      localStorage.setItem('access_token', data.access_token)
+      localStorage.setItem('user_id', data.user_id)
+      localStorage.setItem('email', data.email)
+      
+      // Set token as cookie for server-side access
+      document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`
 
-        // Redirect to dashboard
-        router.push('/dashboard')
-      }
+      // Redirect to dashboard
+      router.push('/dashboard')
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError('Network error occurred. Please try again.')
       console.error('Login error:', err)
     } finally {
       setLoading(false)
@@ -56,6 +58,13 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Welcome to StockFlow</h1>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
+          
+          {/* Demo credentials */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+            <strong>Demo Login:</strong><br />
+            Email: admin@test.com<br />
+            Password: admin123
+          </div>
         </div>
         
         <form onSubmit={handleLogin} className="space-y-6">

@@ -2,21 +2,17 @@
 
 import {
   BarChart3,
-  CheckSquare,
-  Calendar,
-  Users,
-  Settings,
-  HelpCircle,
   LogOut,
   Home,
-  Download
+  Download,
+  ShoppingCart,
+  Truck
 } from "lucide-react"
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-// Menu items exactly as shown in the reference
+// Core menu items that exist in the application
 const menuItems = [
   {
     title: "Dashboard",
@@ -24,39 +20,23 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Tasks",
-    url: "/tasks",
-    icon: CheckSquare,
-    badge: "68"
-  },
-  {
-    title: "Calendar",
-    url: "/calendar",
-    icon: Calendar,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
+    title: "Inventory",
+    url: "/inventory",
     icon: BarChart3,
   },
   {
-    title: "Team",
-    url: "/team",
-    icon: Users,
+    title: "Purchase Orders",
+    url: "/purchase-orders",
+    icon: ShoppingCart,
+  },
+  {
+    title: "Deliveries",
+    url: "/deliveries",
+    icon: Truck,
   },
 ]
 
 const generalItems = [
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
-  {
-    title: "Help",
-    url: "/help",
-    icon: HelpCircle,
-  },
   {
     title: "Logout",
     url: "#",
@@ -65,13 +45,21 @@ const generalItems = [
   },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
+export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter()
 
   const handleLogout = () => {
-    // Clear authentication cookies
-    document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-    document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    // Clear authentication token from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token')
+    }
     
     // Redirect to login
     router.push('/login')
@@ -86,6 +74,25 @@ export function AppSidebar() {
       
       {/* Main sidebar content */}
       <div className="flex-1 flex flex-col bg-gray-50">
+        {/* User Profile Section */}
+        {user && (
+          <div className="px-4 py-4 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
+                {user.email.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user.email.split('@')[0]}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user.email}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Menu Section */}
         <div className="flex-1 px-4 py-6">
           <div className="mb-6">
@@ -109,18 +116,7 @@ export function AppSidebar() {
                     <item.icon className={`h-4 w-4 transition-colors ${isActive(item.url) ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
                     <span className="transition-colors">{item.title}</span>
                   </div>
-                  {item.badge && (
-                    <Badge 
-                      variant="secondary" 
-                      className={`text-xs h-5 px-2 font-medium transition-all ${
-                        isActive(item.url) 
-                          ? 'bg-white/20 text-white border-white/30' 
-                          : 'bg-gray-200 text-gray-700 group-hover:bg-gray-300'
-                      }`}
-                    >
-                      {item.badge}
-                    </Badge>
-                  )}
+
                   {/* Focus ring for accessibility */}
                   <div className={`absolute inset-0 rounded-lg ring-2 ring-green-500 ring-opacity-0 transition-all ${isActive(item.url) ? '' : 'group-focus-visible:ring-opacity-50'}`}></div>
                 </Link>

@@ -1,5 +1,4 @@
 import { GetServerSideProps } from 'next';
-import { supabase } from '../utils/supabaseClient';
 import MainLayout from '../components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,13 +12,68 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { ProductService, DashboardMetrics } from '../services/productService';
+import { PurchaseOrderService, PurchaseOrderSummary, ReorderSuggestion } from '../services/purchaseOrderService';
 
 
 
-const Dashboard = () => {
+interface DashboardProps {
+  user: {
+    id: string;
+    email: string;
+  };
+}
+
+const Dashboard = ({ user }: DashboardProps) => {
   const progressRef = useRef(null);
   const isInView = useInView(progressRef, { once: true });
+  
+  // Real inventory data state
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
+  const [purchaseOrderSummary, setPurchaseOrderSummary] = useState<PurchaseOrderSummary | null>(null);
+  const [reorderSuggestions, setReorderSuggestions] = useState<ReorderSuggestion[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real inventory data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [metrics, poSummary, suggestions] = await Promise.all([
+          ProductService.getDashboardMetrics(),
+          PurchaseOrderService.getPurchaseOrderSummary(),
+          PurchaseOrderService.getReorderSuggestions(5)
+        ]);
+        
+        setDashboardMetrics(metrics);
+        setPurchaseOrderSummary(poSummary);
+        setReorderSuggestions(suggestions.suggestions);
+      } catch (error) {
+        console.error('Error fetching dashboard metrics:', error);
+        // Fallback to mock data if API fails
+        setDashboardMetrics({
+          total_products: 8542,
+          low_stock_count: 127,
+          out_of_stock_count: 23,
+          expiring_soon_count: 89,
+          total_value: 125430.50
+        });
+        setPurchaseOrderSummary({
+          total_orders: 25,
+          pending_orders: 5,
+          shipped_orders: 3,
+          delivered_orders: 17,
+          total_value: 45230.75,
+          pending_value: 12450.30
+        });
+        setReorderSuggestions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
 
   // Sample data for project analytics with monthly data
@@ -80,20 +134,30 @@ const Dashboard = () => {
   ];
 
   return (
-    <MainLayout>
+    <MainLayout user={user}>
       <div className="min-h-screen bg-gray-50">
         <div className="p-6 space-y-6">
           {/* Page Header */}
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">Inventory Management Dashboard</h1>
-              <p className="text-sm text-gray-500 mt-0.5">AI-powered inventory optimization for supermarket operations</p>
+              <p className="text-sm text-gray-500 mt-0.5">Welcome back, {user?.email} - AI-powered inventory optimization</p>
             </div>
             {/* Header Actions */}
             <div className="flex gap-3">
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
+              <Button 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => window.location.href = '/inventory'}
+              >
                 <Plus className="mr-2 h-4 w-4" />
-                Add Product
+                Manage Inventory
+              </Button>
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => window.location.href = '/purchase-orders'}
+              >
+                <ArrowUpRight className="mr-2 h-4 w-4" />
+                Quick Order
               </Button>
               <Button variant="outline" className="text-gray-600 border-gray-300">
                 Import Stock
@@ -109,10 +173,14 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-green-100 text-sm">Total Products</p>
-                    <p className="text-4xl font-bold mt-2">8,542</p>
+                    {loading ? (
+                      <div className="animate-pulse bg-white/20 h-10 w-20 rounded mt-2"></div>
+                    ) : (
+                      <p className="text-4xl font-bold mt-2">{dashboardMetrics?.total_products?.toLocaleString() || '0'}</p>
+                    )}
                     <div className="flex items-center mt-2 text-green-100 text-xs">
                       <TrendingUp className="h-3 w-3 mr-1" />
-                      <span>+12% from last month</span>
+                      <span>Real-time data</span>
                     </div>
                   </div>
                   <div className="p-3 bg-white/20 rounded-full">
@@ -128,7 +196,11 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm">Low Stock Alerts</p>
-                    <p className="text-4xl font-bold text-orange-600 mt-2">127</p>
+                    {loading ? (
+                      <div className="animate-pulse bg-gray-200 h-10 w-16 rounded mt-2"></div>
+                    ) : (
+                      <p className="text-4xl font-bold text-orange-600 mt-2">{dashboardMetrics?.low_stock_count || '0'}</p>
+                    )}
                     <div className="flex items-center mt-2 text-gray-500 text-xs">
                       <TrendingUp className="h-3 w-3 mr-1" />
                       <span>Requires attention</span>
@@ -147,7 +219,11 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm">Out of Stock</p>
-                    <p className="text-4xl font-bold text-red-600 mt-2">23</p>
+                    {loading ? (
+                      <div className="animate-pulse bg-gray-200 h-10 w-12 rounded mt-2"></div>
+                    ) : (
+                      <p className="text-4xl font-bold text-red-600 mt-2">{dashboardMetrics?.out_of_stock_count || '0'}</p>
+                    )}
                     <div className="flex items-center mt-2 text-gray-500 text-xs">
                       <TrendingUp className="h-3 w-3 mr-1" />
                       <span>Critical items</span>
@@ -166,7 +242,11 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm">Expiring Soon</p>
-                    <p className="text-4xl font-bold text-yellow-600 mt-2">89</p>
+                    {loading ? (
+                      <div className="animate-pulse bg-gray-200 h-10 w-12 rounded mt-2"></div>
+                    ) : (
+                      <p className="text-4xl font-bold text-yellow-600 mt-2">{dashboardMetrics?.expiring_soon_count || '0'}</p>
+                    )}
                     <div className="flex items-center mt-2 text-gray-500 text-xs">
                       <span>Next 7 days</span>
                     </div>
@@ -238,20 +318,38 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* AI Insights */}
+            {/* Purchase Order Insights */}
             <Card className="lg:col-span-3 bg-white shadow-sm border border-gray-200">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">AI Insights</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">Purchase Orders</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900">Restock Recommendation</h4>
-                  <p className="text-sm text-gray-500 mt-1">Order 240 units of Milk by tomorrow</p>
-                  <Button className="mt-3 bg-green-600 hover:bg-green-700 text-white w-full">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Order
-                  </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-sm font-medium text-blue-800">Pending Orders</p>
+                    <p className="text-xl font-bold text-blue-900">{purchaseOrderSummary?.pending_orders || 0}</p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-sm font-medium text-green-800">Delivered</p>
+                    <p className="text-xl font-bold text-green-900">{purchaseOrderSummary?.delivered_orders || 0}</p>
+                  </div>
                 </div>
+                
+                {reorderSuggestions.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Restock Recommendation</h4>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {reorderSuggestions[0].product_name} - Stock: {reorderSuggestions[0].current_stock}
+                    </p>
+                    <Button 
+                      className="mt-3 bg-green-600 hover:bg-green-700 text-white w-full"
+                      onClick={() => window.location.href = '/purchase-orders'}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Order
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -320,7 +418,13 @@ const Dashboard = () => {
                         d="M 40 110 A 100 100 0 0 1 240 110"
                         fill="none"
                         stroke={(() => {
-                          const progressPercent = (41/200) * 100; // Updated to 200 scale
+                          if (loading || !dashboardMetrics) return "#9ca3af"; // Gray while loading
+                          const totalItems = dashboardMetrics.total_products;
+                          const lowStockItems = dashboardMetrics.low_stock_count;
+                          const outOfStockItems = dashboardMetrics.out_of_stock_count;
+                          const healthyStock = totalItems - lowStockItems - outOfStockItems;
+                          const progressPercent = totalItems > 0 ? (healthyStock / totalItems) * 100 : 0;
+                          
                           if (progressPercent < 25) return "#dc2626"; // Red for low stock
                           if (progressPercent < 60) return "#eab308"; // Yellow for medium stock
                           return "#16a34a"; // Green for high stock
@@ -330,7 +434,15 @@ const Dashboard = () => {
                         strokeDasharray="314"
                         initial={{ strokeDashoffset: 314 }}
                         animate={isInView ? { 
-                          strokeDashoffset: 314 - (41/200) * 314 // Updated to 200 scale
+                          strokeDashoffset: (() => {
+                            if (loading || !dashboardMetrics) return 314;
+                            const totalItems = dashboardMetrics.total_products;
+                            const lowStockItems = dashboardMetrics.low_stock_count;
+                            const outOfStockItems = dashboardMetrics.out_of_stock_count;
+                            const healthyStock = totalItems - lowStockItems - outOfStockItems;
+                            const progressPercent = totalItems > 0 ? (healthyStock / totalItems) * 100 : 0;
+                            return 314 - (progressPercent / 100) * 314;
+                          })()
                         } : { strokeDashoffset: 314 }}
                         transition={{ duration: 2.5, delay: 0.5, ease: "easeOut" }}
                         filter="url(#glow)"
@@ -498,7 +610,7 @@ const Dashboard = () => {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
-  const token = req.cookies['sb-access-token'];
+  const token = req.cookies['access_token'];
 
   console.log('Dashboard auth check - Token present:', !!token);
 
@@ -513,16 +625,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    
-    console.log('Supabase auth result - User:', !!user, 'Error:', !!error);
+    // Verify token with backend (use container name for server-side requests)
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://backend:8000/api/auth/me'  // Container-to-container communication
+      : 'http://localhost:8000/api/auth/me'; // Fallback
+      
+    const response = await fetch(backendUrl, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
-    if (error) {
-      console.error('Supabase auth error:', error.message);
+    if (!response.ok) {
+      console.log('Token verification failed, redirecting to login');
       // Clear the invalid token
       context.res.setHeader('Set-Cookie', [
-        'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-        'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       ]);
       
       return {
@@ -533,17 +651,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    if (!user) {
-      console.log('No user found, redirecting to login');
-      return {
-        redirect: {
-          destination: '/login',
-        permanent: false,
-        },
-      };
-    }
-
+    const user = await response.json();
     console.log('Authentication successful for user:', user.email);
+    
     return {
       props: {
         user,

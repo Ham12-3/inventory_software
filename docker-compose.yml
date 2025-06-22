@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app/backend:/app
+      - backend_data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///./data/inventory.db
+      - JWT_SECRET_KEY=dev-secret-key-change-in-production
+      - APP_ENV=development
+      - DEBUG=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (Next.js)
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app/frontend:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=development
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Optional: PostgreSQL database (uncomment if needed)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: inventory
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+volumes:
+  backend_data:
+  # postgres_data: 
